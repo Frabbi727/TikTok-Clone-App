@@ -59,9 +59,9 @@ class LoginScreen extends StatelessWidget {
                 ),
                 Container(
                   child: InkWell(
-                    onTap: () {
-                      print('Click');
-                    },
+                    onTap: () => authController.loginUser(
+                        _emailController.text.trim(),
+                        _passwordController.text.trim()),
                     child: Center(
                       child: Text(
                         'Login',

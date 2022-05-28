@@ -104,9 +104,9 @@ class SignupScreen extends StatelessWidget {
 
                     onTap: () => authController.registerUser(
                       
-                      _userNameController.text,
-                      _emailController.text,
-                      _passwordController.text,
+                      _userNameController.text.trim(),
+                      _emailController.text.trim(),
+                      _passwordController.text.trim(),
                       authController.profilePhoto,
                     ),
 

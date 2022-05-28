@@ -2,10 +2,14 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tiktoc_clone_app/constants.dart';
+import 'package:tiktoc_clone_app/views/screens/auth/login_screen.dart';
+import 'package:tiktoc_clone_app/views/screens/home_screen.dart';
 
 import '../models/user.dart' as model;
 
@@ -77,6 +81,25 @@ import '../models/user.dart' as model;
 
 class AuthController extends GetxController {
   static AuthController instance = Get.find();
+  // refresh user every time for home screen
+  late Rx<User?>
+      _user; // this User is not the model User, Its firebase Auth User
+
+  @override
+  void onReady() {
+    _user = Rx<User?>(firebaseAuth.currentUser);
+    _user.bindStream(firebaseAuth.authStateChanges());
+    ever(_user, _setInitialScreen);
+    super.onReady();
+  }
+
+  _setInitialScreen(User? user) {
+    if (user == null) {
+      Get.offAll(() => LoginScreen());
+    } else {
+      Get.offAll(() => HomeScreen());
+    }
+  }
 
   // PickImage from gallery
   late Rx<File?> _pickedImage;
@@ -119,7 +142,7 @@ class AuthController extends GetxController {
 // if all are ok then save email and password save for authentication and save other data to firebase database
         UserCredential cred = await firebaseAuth.createUserWithEmailAndPassword(
             email: email, password: password);
-            print('Upload image');
+        print('Upload image');
 // image Uplodad
         String downloadUrl = await _uploadToStorage(image);
         model.User user = model.User(
@@ -129,10 +152,7 @@ class AuthController extends GetxController {
           profilePhoto: downloadUrl,
         );
         print('enter 001****');
-        await firestore
-            .collection('users')
-            .doc(cred.user!.uid)
-            .set(
+        await firestore.collection('users').doc(cred.user!.uid).set(
               user.toJson(),
             );
 
@@ -153,6 +173,33 @@ class AuthController extends GetxController {
       print('enter into the catch block // AuthController file');
       Get.snackbar('Error (2) for creating account', e.toString());
       print(e.toString());
+    }
+  }
+
+// Login User function
+
+  void loginUser(String email, String password) async {
+    try {
+      print('Enter Login Try bloc // AuthController file');
+      if (email.isNotEmpty && password.isNotEmpty) {
+        print('Enter login if Statement // AuthController file');
+        // Login User
+        await firebaseAuth.signInWithEmailAndPassword(
+            email: email, password: password);
+        print('User log in successfully');
+        print(firebaseAuth.currentUser!.email);
+        print(firebaseAuth.currentUser!.uid);
+      } else {
+        print(
+            'Enter login user else statement problem occured // AuthController file ');
+        Get.snackbar(
+            'User Login fail', 'Check your credential // AuthController file');
+      }
+    } catch (e) {
+      print(
+          'enter login catch block which mean problem // AuthController file');
+      Get.snackbar('Error Login User', e.toString(),
+          padding: EdgeInsets.all(5), icon: Icon(Icons.dangerous));
     }
   }
 }
