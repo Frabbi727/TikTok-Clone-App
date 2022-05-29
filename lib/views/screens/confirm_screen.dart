@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:tiktoc_clone_app/controllers/upload_video_conroller.dart';
 import 'package:tiktoc_clone_app/views/widgets/text_input_field.dart';
 import 'package:video_player/video_player.dart';
+import 'package:get/get.dart';
 
 class ConfirmScreen extends StatefulWidget {
   final File videoFile;
@@ -17,8 +19,10 @@ class ConfirmScreen extends StatefulWidget {
 
 class _ConfirmScreenState extends State<ConfirmScreen> {
   late VideoPlayerController controller;
-  TextEditingController songController = TextEditingController();
-  TextEditingController captionController = TextEditingController();
+  TextEditingController _songController = TextEditingController();
+  TextEditingController _captionController = TextEditingController();
+  UploadVideoController uploadVideoController =
+      Get.put(UploadVideoController());
   @override
   void initState() {
     setState(() {
@@ -58,7 +62,7 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
                     width: MediaQuery.of(context).size.width - 20,
                     margin: EdgeInsets.symmetric(horizontal: 10),
                     child: TextInputField(
-                      controller: songController,
+                      controller: _songController,
                       labelText: 'Song Name',
                       icon: Icons.music_note,
                     ),
@@ -70,7 +74,7 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
                     width: MediaQuery.of(context).size.width - 20,
                     margin: EdgeInsets.symmetric(horizontal: 10),
                     child: TextInputField(
-                      controller: captionController,
+                      controller: _captionController,
                       labelText: 'Caption',
                       icon: Icons.closed_caption,
                     ),
@@ -79,7 +83,10 @@ class _ConfirmScreenState extends State<ConfirmScreen> {
                     height: 10,
                   ),
                   ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => uploadVideoController.uploadVido(
+                          _songController.text.trim(),
+                          _captionController.text.trim(),
+                          widget.videoPath),
                       child: Text(
                         'Share',
                         style: TextStyle(fontSize: 20, color: Colors.white),
